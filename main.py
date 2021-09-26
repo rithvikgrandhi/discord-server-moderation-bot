@@ -57,11 +57,9 @@ async def on_message(message):
     if (not message.author.bot):
 
     
-      if("chad" in str(message.content).lower()):
-       
-        await message.channel.send("if you are looking for chad, it is <@738685698206597171>")
+      
         
-
+      
     
       if("pride" in str(message.content).lower()):
         await message.channel.send("https://tenor.com/view/pes-pesuniversity-pesu-may-the-pride-of-pes-may-the-pride-of-pes-be-with-you-gif-21274060")
@@ -69,20 +67,41 @@ async def on_message(message):
 
 #00000000000000000000000000000000000000000000000000000000000000000
 
-@client.command()
-async def mute(ctx, member : discord.Member = None):
-
-    if member is None:
-        await ctx.send('Please pass in a valid user')
-        return
-
-    await member.add_roles('mooted')
-
-    await ctx.send(f'{str(member)} was muted!')
+    @commands.command(aliases=['e', 'echo'])
+    async def echo(self, ctx, dest: discord.TextChannel = None, *, message: str = ''):
+        echo_embed = discord.Embed(
+            title="Echo", color=0x48BF91, description=self.echo)
+        if((self.admin in ctx.author.roles) or (self.mod in ctx.author.roles)):
+            if(dest == None):
+                await ctx.channel.send(embed=echo_embed)
+                return
+            attachment = ctx.message.attachments
+            if(dest.id == ctx.channel.id):
+                await ctx.message.delete()
+            # if(message != ''):
+            #     sent = await dest.send(message)
+            if(len(attachment) != 0):
+                await attachment[0].save(attachment[0].filename)
+                sent = await dest.send(file=discord.File(attachment[0].filename))
+                os.remove(attachment[0].filename)
+                if(message != ''):
+                    await sent.edit(content=message)
+            else:
+                await dest.send(content=message)
+        else:
+            await ctx.channel.send("Sucka you can't do that")
 @client.event
-async def on_command_error(ctx, error):
-    await ctx.send(error)
-    await (ctx.send("{} made this error".format(ctx.author.mention)))
+
+async def on_message_edit(before,after):
+  channellogs = client.get_channel(891551602509488128)
+  await channellogs.send(str(before.author)+" in "+str(before.channel)+"\nbefore: "+before.content+"\nafter: "+after.content)
+
+@client.event
+
+async def on_message_delete(before,after):
+  channellogs = client.get_channel(891551602509488128)
+  await channellogs.send(str(before.author)+" in "+str(before.channel)+"\nbefore: "+before.content+"\nafter: "+after.content)
+
 #000000000000000000000000000000000000000000000000000000000000000000
 @client.event  # check if bot is ready
 async def on_ready():
