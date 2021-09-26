@@ -100,8 +100,8 @@ async def on_message(message):
 async def on_message_edit(before,after):
     channellogs=client.get_channel(891551602509488128)
     embed=discord.Embed(title=str(before.author)+"edited the message in "+str(before.channel),color=discord.Color.random())
-    embed.add_field(name="Before:",value=before.content)
-    embed.add_field(name="After:",value=after.content)
+    embed.add_field(name="Before:",value=before.content,inline=False)
+    embed.add_field(name="After:",value=after.content,inline=False)
     await channellogs.send(embed=embed)
 
 #000000000000000000000000000000000000000000000000000000000000000000
