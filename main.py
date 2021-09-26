@@ -90,17 +90,19 @@ async def on_message(message):
                 await dest.send(content=message)
         else:
             await ctx.channel.send("Sucka you can't do that")
-@client.event
+# @client.event
 
+# async def on_message_edit(before,after):
+#   channellogs = client.get_channel(891551602509488128)
+#   await channellogs.send(str(before.author)+" in "+str(before.channel)+"\nbefore: "+before.content+"\nafter: "+after.content)
+
+@client.event
 async def on_message_edit(before,after):
-  channellogs = client.get_channel(891551602509488128)
-  await channellogs.send(str(before.author)+" in "+str(before.channel)+"\nbefore: "+before.content+"\nafter: "+after.content)
-
-@client.event
-
-async def on_message_delete(before,after):
-  channellogs = client.get_channel(891551602509488128)
-  await channellogs.send(str(before.author)+" in "+str(before.channel)+"\nbefore: "+before.content+"\nafter: "+after.content)
+    channellogs=client.get_channel(891551602509488128)
+    embed=discord.Embed(title=str(before.author)+"edited the message in "+str(before.channel),color=discord.Color.random())
+    embed.add_field(name="Before:",value=before.content)
+    embed.add_field(name="After:",value=after.content)
+    await channellogs.send(embed=embed)
 
 #000000000000000000000000000000000000000000000000000000000000000000
 @client.event  # check if bot is ready
