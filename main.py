@@ -147,7 +147,7 @@ async def on_message_delete(message):
      snipe_message_author[message.channel.id] = message.author
      snipe_message_content[message.channel.id] = message.content
      channellogs=client.get_channel(891551602509488128)
-     embed=discord.Embed(title=str(message.author)+"deleted the message in "+str(message.channel),color=discord.Color.random())
+     embed=discord.Embed(title=str(message.author)+"deleted the message in "+str(message.channel),color=discord.Color.red())
      embed.add_field(name="Message:",value=message.content,inline=False)
      await channellogs.send(embed=embed)
     
@@ -169,19 +169,6 @@ async def snipe(ctx):
 
 #000000000000000000000000000000000000000000000000000000000000000000
 
-@client.event
-async def on_message(message):
-    #
-    if (not message.author.bot):
-
-    
-      
-        
-      
-    
-      if("pride" in str(message.content).lower()):
-        await message.channel.send("https://tenor.com/view/pes-pesuniversity-pesu-may-the-pride-of-pes-may-the-pride-of-pes-be-with-you-gif-21274060")
-    await client.process_commands(message)
 
 #00000000000000000000000000000000000000000000000000000000000000000
 
@@ -217,12 +204,22 @@ async def on_message(message):
 @client.event
 async def on_message_edit(before,after):
     channellogs=client.get_channel(891551602509488128)
-    embed=discord.Embed(title=str(before.author)+"edited the message in "+str(before.channel),color=discord.Color.random())
+    embed=discord.Embed(title=str(before.author)+"edited the message in "+str(before.channel),color=discord.Color.blue())
     embed.add_field(name="Before:",value=before.content,inline=False)
     embed.add_field(name="After:",value=after.content,inline=False)
     await channellogs.send(embed=embed)
 
 #000000000000000000000000000000000000000000000000000000000000000000
+
+@client.event
+async def on_voice_state_update(member, before, after):
+	channellogs=client.get_channel(891551602509488128)
+	if(not before.channel and after.channel):
+		embed=discord.Embed(title="someone has joined vc",color=discord.Color.green())
+		embed.add_field(name="Username:",value=member)
+		await channellogs.send(embed=embed)
+
+
 @client.event  # check if bot is ready
 async def on_ready():
     print('Bot online')
