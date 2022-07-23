@@ -2,9 +2,17 @@ import os
 import discord
 import asyncio
 from discord.ext import commands
-from discord.ext import tasks
 from discord.utils import get
 from webserver import keep_alive
+
+######################################################################
+#data
+mods = [
+    760161883336081408,764118123330273330,708719821226901534,676050443180179468,699646699177639936,793111567184297985,724570818360639508
+]
+
+admin_role_id=834694539142103041
+
 
 ######################################################################
 
@@ -12,10 +20,17 @@ intents = discord.Intents.default()
 intents.members = True
 client = commands.Bot(command_prefix=".", intents=intents)
 
+
 ######################################################################
 @client.event  # check if bot is ready
 async def on_ready():
     print('Bot online')
+    await client.change_presence(activity=discord.Game(
+        name="with the pride of PESU"))
+    #msg1.start()
+
+
+channellogs = client.get_channel(891551602509488128)
 
 ######################################################################
 
@@ -23,46 +38,56 @@ async def on_ready():
 async def ping(ctx):
     await ctx.send(f"Ping: {round(client.latency * 1000)} ms")
 
-######################################################################
-
-@client.command(name='topper')
-async def topper(ctx):
-    await ctx.send("that is <@708719821226901534>")
 
 ######################################################################
 
 @client.command()
-async def hello(ctx):
-    await ctx.send(f'Hello {ctx.author.mention}')
-    await ctx.author.send("hello,I hope you are doing good")
+@commands.has_any_role("Admin", "Mod")
+async def leaveg(ctx, ):
+    guild_name = 'stuff'
+    guild = discord.utils.get(client.guilds,
+                              name=guild_name)  # Get the guild by name
+    if guild is None:
+        print("No guild with that name found.")  # No guild found
+        return
+    await guild.leave()  # Guild found
+    await ctx.send(f"I left: {guild.name}!")
 
-######################################################################
 
-@client.command()
-async def greet(ctx, name, *, greeting):
-    await ctx.send(f"{greeting} {name}")
+###################################################################
 
-######################################################################
-
-@client.command()
-async def noob(ctx):
-    await ctx.send("no you")
-
-######################################################################
 
 @client.command()
-async def pride(ctx):
-    await ctx.send(
-        "https://tenor.com/view/pes-pesuniversity-pesu-may-the-pride-of-pes-may-the-pride-of-pes-be-with-you-gif-21274060"
-    )
+@commands.has_any_role("Admin", "Mod")
+async def dm(ctx, i):
+    guild = client.get_guild(i)
+    guildchannel = guild.system_channel
+    invitelink = await guildchannel.create_invite(max_uses=1, unique=True)
+    await ctx.send(invitelink)
+
+
+####################################################################
+    
+@client.command(aliases=['servers', 'guilds'])
+async def guilds_command(ctx):
+    if ((ctx.author.id == 760161883336081408)):
+        await ctx.channel.trigger_typing()
+
+        number = 0
+        guilds_details = await client.fetch_guilds(limit=150).flatten()
+        await ctx.send("```You have clearance```")
+        list1 = []
+        for guild_deets in guilds_details:
+            number += 1
+            list1.append(guild_deets.name)
+        await ctx.send(list1)
+
+    else:
+        await ctx.send("You are not authorised for this")
+
 
 ######################################################################
 
-@client.command()
-async def god(ctx):
-    await ctx.send("that is <@676050443180179468>")
-
-######################################################################
 
 #clear command
 @client.command(aliases=['purge', 'p'])
@@ -73,14 +98,18 @@ async def clear(ctx, amount=1):
     else:
         await ctx.send("Don't have permission to delete messages here")
 
+
 ######################################################################
+
 
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("Required arguments not given")
 
+
 ######################################################################
+
 
 @client.command(aliases=["mc"])
 async def message_count(ctx, channel: discord.TextChannel = None):
@@ -91,16 +120,25 @@ async def message_count(ctx, channel: discord.TextChannel = None):
         count += 1
     await ctx.send(f"There were {count} messages in {channel.mention}")
 
-######################################################################
+
+########################################################################
+
 
 @client.event
 async def on_message(message):
-    if message.channel.id == 889139570304757780 and (message.content != ":hmmlurk:" and message.content!='<a:hmmlurk:869808170804068362>') and message.author!=client.user:
+    if message.reference is not None and message.channel.id == 889139570304757780:
+        await message.channel.purge(limit=1)
+
+    elif message.channel.id == 889139570304757780 and (
+            message.content != ":hmmlurk:" and message.content !=
+            'https://cdn.discordapp.com/emojis/869808170804068362.gif?size=48&quality=lossless'
+            and message.content != '<a:hmmlurk:869808170804068362>'):
         await message.channel.purge(limit=1)
 
     await client.process_commands(message)
 
-######################################################################
+
+# ######################################################################
 
 #server information command
 @client.command()
@@ -122,15 +160,19 @@ async def serverinfo(ctx):
     embed.add_field(name="Member count", value=memberCount, inline=False)
     await ctx.send(embed=embed)
 
+
 ######################################################################
+
 
 #kick command
 @client.command()
-@commands.has_role(834694539142103041)
-async def kick(ctx, member: discord.Member, *, reason="No reason given"):
-    await member.send("You were kicked from " + ctx.guild.name + ". Reason: " +
-                      reason)
-    await member.kick(reason=reason)
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member: discord.Member, *, reason=None):
+
+    await ctx.guild.kick(member)
+    await ctx.send(f'User {member.mention} has been kicked for {reason}')
+    await channellogs.send(
+        f'User {member.mention} has been kicked for {reason}')
 
 
 @kick.error
@@ -138,33 +180,37 @@ async def kick_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
         await ctx.send("You don't have the permssion to use this command")
 
-######################################################################
 
-#ban command
+######################################################################
+        
 @client.command()
-@commands.has_role(834694539142103041)
-async def ban(ctx, member: discord.Member, *, reason="No reason given"):
-    await member.send("You were banned from " + ctx.guild.name + ". Reason: " +
-                      reason)
-    await member.ban(reason=reason)
+@commands.has_any_role("Admin", "Mod")
+async def ban(ctx, member: discord.User = None, reason=None):
+    if member == None or member == ctx.message.author:
+        await ctx.channel.send("You cannot ban yourself")
+        return
+    if reason == None:
+        reason = "For being a jerk!"
+    message = f"You have been banned from {ctx.guild.name} for {reason}"
+    await member.send(message)
+    await ctx.guild.ban(member, reason=reason)
+    await ctx.channel.send(f"{member} is banned!")
 
-
-@ban.error
-async def ban_error(ctx, error):
-    if isinstance(error, commands.CheckFailure):
-        await ctx.send("You don't have the permssion to use this command")
 
 ######################################################################
+
 
 #unban command
-@client.command()
-@commands.has_role(834694539142103041)
+@client.command(pass_context=True)
+@commands.has_any_role("Admin", "Mod")
 async def unban(ctx, *, member):
     banned_members = await ctx.guild.bans()
     for person in banned_members:
         user = person.user
         if member == str(user):
             await ctx.guild.unban(user)
+            ctx.send(member, "is unbanned")
+            channellogs.send(member, "is unbanned")
 
 
 @unban.error
@@ -172,19 +218,23 @@ async def unban_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
         await ctx.send("You don't have the permssion to use this command")
 
+
 ######################################################################
+
 
 #role giving command
 @client.command(pass_context=True)
-@commands.has_role(834694539142103041)
-async def giveRole(ctx, member: discord.Member, role: discord.Role):
+@commands.has_any_role("Admin", "Mod")
+async def giveRole(ctx, member: discord.Member,*, role: discord.Role):
     await member.add_roles(role)
+    await ctx.send(f"Gave role **{role}** to **{member.mention}**")
 
 
 @giveRole.error
 async def giveRole_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
         await ctx.send("You don't have the permssion to use this command")
+
 
 ######################################################################
 snipe_message_author = {}
@@ -193,12 +243,14 @@ snipe_message_content = {}
 
 @client.event
 async def on_message_delete(message):
+    # if message.contains
     snipe_message_author[message.channel.id] = message.author
     snipe_message_content[message.channel.id] = message.content
     channellogs = client.get_channel(891551602509488128)
-    embed = discord.Embed(title=str(message.author) +
-                          " deleted the message in " + str(message.channel),
+    embed = discord.Embed(title="someone deleted a message ",
                           color=discord.Color.red())
+    embed.add_field(name="Sender:", value=message.author)
+    embed.add_field(name='Channel:', value=message.channel.mention)
     embed.add_field(name="Message:", value=message.content, inline=False)
     await channellogs.send(embed=embed)
 
@@ -207,7 +259,9 @@ async def on_message_delete(message):
     del snipe_message_author[message.channel.id]
     del snipe_message_content[message.channel.id]
 
+
 ######################################################################
+
 
 @client.command(name='snipe')
 async def snipe(ctx):
@@ -227,17 +281,28 @@ async def snipe(ctx):
 
 #00000000000000000000000000000000000000000000000000000000000000000
 
+
 @client.event
 async def on_message_edit(before, after):
+
+    if before.channel.id == 889139570304757780:
+        before.delete
     channellogs = client.get_channel(891551602509488128)
-    embed = discord.Embed(title=str(before.author) +
-                          " edited the message in " + str(before.channel),
+    '''
+    if before.channel.id == 889139570304757780 and (after!='https://cdn.discordapp.com/emojis/869808170804068362.gif?size=48' and
+    after!='<a:hmmlurk:869808170804068362>'):
+        await after.delete()
+  '''
+    embed = discord.Embed(title=str(before.author) + " edited a message",
                           color=discord.Color.blue())
+
+    embed.add_field(name="channel", value=before.channel.mention)
     embed.add_field(name="Before:", value=before.content, inline=False)
     embed.add_field(name="After:", value=after.content, inline=False)
     await channellogs.send(embed=embed)
 
 ######################################################################
+
 
 #changing nicknames command
 @client.command()
@@ -250,7 +315,9 @@ async def nick(ctx, member: discord.Member, *, newname: str):
     else:
         await ctx.send("Don't  have permissions to change nicknames")
 
+
 ######################################################################
+
 
 @client.event
 async def on_voice_state_update(member, before, after):
@@ -261,30 +328,66 @@ async def on_voice_state_update(member, before, after):
         embed.add_field(name="Username:", value=member)
         await channellogs.send(embed=embed)
 
+
 ######################################################################
+
+
+@client.command()
+@commands.has_any_role("Admin", "Mod")
+async def echo(ctx,
+               destination: discord.TextChannel = None,
+               *,
+               message: str = ""):
+    if (message == ""):
+        await ctx.send("Enter some message to echo")
+    else:
+        if (destination == None):
+            await ctx.send(message)
+            await ctx.message.delete()
+        else:
+            await destination.send(message)
+            await ctx.message.delete()
+
+
+@echo.error
+async def echo_error(ctx, error):
+    if isinstance(error, commands.CheckFailure):
+        await ctx.send("not worthy enough")
+
+
+##########################################################################################
+
 
 @client.command()
 # @commands.has_role()
-async def spam(ctx):
+async def stress(ctx):
     if (ctx.author.id == 760161883336081408
-            or ctx.author.id == 764118123330273330 or ctx.author.id==793111567184297985):
-      emoji = discord.utils.get(client.emojis, name = 'hypersweat')
-      for i in range(0,5):
-        msg1=(str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji)+str(emoji))
-        await ctx.send(msg1)
+            or ctx.author.id == 764118123330273330
+            or ctx.author.id == 793111567184297985):
+        emoji = discord.utils.get(client.emojis, name='hypersweat')
+        for i in range(0, 5):
+            msg1 = (str(emoji) + str(emoji) + str(emoji) + str(emoji) +
+                    str(emoji) + str(emoji) + str(emoji) + str(emoji) +
+                    str(emoji) + str(emoji) + str(emoji) + str(emoji) +
+                    str(emoji) + str(emoji) + str(emoji) + str(emoji) +
+                    str(emoji))
+            await ctx.send(msg1)
 
- ######################################################################
-
+##########################################################################
 @client.event
 async def on_member_join(member):
 
-    await member.send(f" Hi {member.mention}, welcome to PES media server. Select your cycle in #🗝️get-roles and you'll get access to the important docs of your courses. You get the role by selecting the appropriate emoji as reaction. \n Please note that we do not promote plagiarism on this server (aka you can't ask assignment answers). ||mainly cuz we don't want to be held responsible for it || \n If you find something missing in the docs or your teacher sent you some other reference material, you can ping any of the mods or admins.")
-    
+    await member.send(
+        f" Hi {member.mention}, welcome to PES media server. Select your cycle in <#877217840493649940> and you'll get access to the important docs of your courses. You get the role by selecting the appropriate emoji as reaction. \n Please note that we do not promote plagiarism on this server (aka you can't ask assignment answers). ||mainly cuz we don't want to be held responsible for it || \n If you find something missing in the docs or your teacher sent you some other reference material, you can ping any of the mods or admins. NOTE: PLS FEEL FREE TO FUCK OFF IF YOU'RE NOT FROM PES UNIVERSITY"
+    )
+
     channellogs2 = client.get_channel(891551602509488128)
-    embed = discord.Embed(title="someone has joined the server", description=member,color=discord.Color.gold())
+    embed = discord.Embed(title="someone joined the server",
+                          description=member,
+                          color=discord.Color.gold())
     embed.add_field(name="Username: ", value=member.mention)
-    
     await channellogs2.send(embed=embed)
+
 
 ######################################################################
 
@@ -297,19 +400,24 @@ async def assemble(ctx):
             "<@699646699177639936> <@764118123330273330>  <@760161883336081408> <@738685698206597171> <@793111567184297985>"
         )
 
+
 ######################################################################
 
-@client.command(aliases=['C','c'])
-async def count(ctx,*, role:str=""):
-    if(role == ""):
-        await ctx.channel.send(f"We have **{ctx.guild.member_count}** people in this server")
+
+@client.command(aliases=['C', 'c'])
+async def count(ctx, *, role: str = ""):
+    if (role == ""):
+        await ctx.channel.send(
+            f"We have **{ctx.guild.member_count}** people in this server")
     else:
         try:
-            ROLE=ctx.guild.get_role(int(role))
-            await ctx.channel.send(f"**{len(ROLE.members)}** people have the role **{ROLE.name}**")
-            
+            ROLE = ctx.guild.get_role(int(role))
+            await ctx.channel.send(
+                f"**{len(ROLE.members)}** people have the role **{ROLE.name}**"
+            )
+
         except:
-            guild=ctx.guild
+            guild = ctx.guild
             thisRole = []
             thisRole.append(get(ctx.guild.roles, name=role))
             count = 0
@@ -320,8 +428,75 @@ async def count(ctx,*, role:str=""):
                         boolean = False
                     if boolean:
                         count += 1
-            await ctx.channel.send(f"**{count}** people have the role **{role}**")
+            await ctx.channel.send(
+                f"**{count}** people have the role **{role}**")
 
+#############################################################################
+'''
+@client.command()
+@commands.has_any_role("Admin")
+async def removeroles(ctx):
+    x = ctx.guild.members
+    await ctx.send("started")
+    for member in x:
+        await member.remove_roles(member.roles)
+    await ctx.send("done <@760161883336081408> lessgo")
+'''
+##############################################################################
+
+
+######################################################################
+#useless fun commands
+
+@client.command()
+async def hello(ctx):
+    await ctx.send(f'Hello {ctx.author.mention}')
+    await ctx.author.send("hello,I hope you are doing good")
+
+@client.command()
+async def pride(ctx):
+    await ctx.channel.send(
+        "https://tenor.com/view/pes-pesuniversity-pesu-may-the-pride-of-pes-may-the-pride-of-pes-be-with-you-gif-21274060"
+    )
+
+@client.command()
+async def noob(ctx):
+    await ctx.channel.send("no you")
+
+@client.command()
+async def god(ctx):
+    await ctx.channel.send("I'm god, god is great <a:elmofire:869949972165050428>")
+
+@client.command()
+async def topper(ctx):
+    await ctx.channel.send(f"{ctx.author.mention} that can be you too if you study, noob go study <:thu:878501339011874886> ")
+    await ctx.channel.send("<:gostudy:972839521324523571>")
+
+@client.command()
+async def chad(ctx):
+    await ctx.channel.send("Stop calling others chad for everything, go study <:tengue_fold:869949822709420054> , if I see chad word again,then I will kick you <:thu:878501339011874886>")
+
+@client.command()
+async def stripper(ctx):
+    await ctx.channel.send("that is <@744592590749433926>")
+
+######################################################################
+            
+@client.command()
+async def spam(ctx, count, *user):
+    if (ctx.message.author.id == 760161883336081408
+            or ctx.message.author.id == 657648133701894174
+            or ctx.message.author.id == 793111567184297985
+            or ctx.message.author.id == 764118123330273330):
+        for i in range(int(count)):
+
+            await ctx.send(" ".join(list(user)))
+
+    else:
+        await ctx.send(ctx.author.mention, 'you cant, kekw')
+
+
+######################################################################
 
 keep_alive()
 
