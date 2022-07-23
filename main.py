@@ -65,7 +65,7 @@ async def god(ctx):
 ######################################################################
 
 #clear command
-@client.command(aliases=['purge', 'p', 'c'])
+@client.command(aliases=['purge', 'p'])
 async def clear(ctx, amount=1):
     perms = ctx.channel.permissions_for(ctx.author)
     if perms.manage_messages:
@@ -82,7 +82,7 @@ async def on_command_error(ctx, error):
 
 ######################################################################
 
-@client.command()
+@client.command(aliases=["mc"])
 async def message_count(ctx, channel: discord.TextChannel = None):
     channel = channel or ctx.channel
     await ctx.send("counting")
@@ -278,14 +278,12 @@ async def spam(ctx):
 @client.event
 async def on_member_join(member):
 
-    await member.send(f" Hi {member.mention}, welcome to PES media server. Select your cycle in #🗝️get-roles and you'll get access to the important docs of your courses. You get the role by selecting the appropriate emoji as reaction. Please note that we do not promote plagiarism on this server (aka you can't ask assignment answers). ||mainly cuz we don't want to be held responsible for it || \n If you find something missing in the docs or your teacher sent you some other reference material, you can ping any of the mods or admins.")
+    await member.send(f" Hi {member.mention}, welcome to PES media server. Select your cycle in #🗝️get-roles and you'll get access to the important docs of your courses. You get the role by selecting the appropriate emoji as reaction. \n Please note that we do not promote plagiarism on this server (aka you can't ask assignment answers). ||mainly cuz we don't want to be held responsible for it || \n If you find something missing in the docs or your teacher sent you some other reference material, you can ping any of the mods or admins.")
     
     channellogs2 = client.get_channel(891551602509488128)
-
     embed = discord.Embed(title="someone has joined the server", description=member,color=discord.Color.gold())
     embed.add_field(name="Username: ", value=member.mention)
     
-
     await channellogs2.send(embed=embed)
 
 ######################################################################
@@ -298,6 +296,31 @@ async def assemble(ctx):
         await ctx.send(
             "<@699646699177639936> <@764118123330273330>  <@760161883336081408> <@738685698206597171> <@793111567184297985>"
         )
+
+######################################################################
+
+@client.command(aliases=['C','c'])
+async def count(ctx,*, role:str=""):
+    if(role == ""):
+        await ctx.channel.send(f"We have **{ctx.guild.member_count}** people in this server")
+    else:
+        try:
+            ROLE=ctx.guild.get_role(int(role))
+            await ctx.channel.send(f"**{len(ROLE.members)}** people have the role **{ROLE.name}**")
+            
+        except:
+            guild=ctx.guild
+            thisRole = []
+            thisRole.append(get(ctx.guild.roles, name=role))
+            count = 0
+            for member in guild.members:
+                boolean = True
+                for roles in thisRole:
+                    if roles not in member.roles:
+                        boolean = False
+                    if boolean:
+                        count += 1
+            await ctx.channel.send(f"**{count}** people have the role **{role}**")
 
 
 keep_alive()
