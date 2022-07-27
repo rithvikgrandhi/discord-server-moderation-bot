@@ -42,7 +42,7 @@ async def ping(ctx):
 ######################################################################
 
 @client.command()
-@commands.has_any_role("Admin", "Mod")
+@commands.has_any_role("Admin")
 async def leaveg(ctx, ):
     guild_name = 'stuff'
     guild = discord.utils.get(client.guilds,
@@ -58,7 +58,7 @@ async def leaveg(ctx, ):
 
 
 @client.command()
-@commands.has_any_role("Admin", "Mod")
+@commands.has_any_role("Admin")
 async def dm(ctx, i):
     guild = client.get_guild(i)
     guildchannel = guild.system_channel
@@ -91,11 +91,13 @@ async def guilds_command(ctx):
 
 #clear command
 @client.command(aliases=['purge', 'p'])
+@commands.has_any_role("Admin")
 async def clear(ctx, amount=1):
-    perms = ctx.channel.permissions_for(ctx.author)
-    if perms.manage_messages:
-        await ctx.channel.purge(limit=amount + 1)
-    else:
+    await ctx.channel.purge(limit=amount + 1)
+
+@clear.error
+async def clear_error(ctx, error):
+    if isinstance(error, commands.CheckFailure):
         await ctx.send("Don't have permission to delete messages here")
 
 
@@ -112,6 +114,7 @@ async def on_command_error(ctx, error):
 
 
 @client.command(aliases=["mc"])
+@commands.has_any_role("Admin")
 async def message_count(ctx, channel: discord.TextChannel = None):
     channel = channel or ctx.channel
     await ctx.send("counting")
@@ -119,6 +122,12 @@ async def message_count(ctx, channel: discord.TextChannel = None):
     async for _ in channel.history(limit=None):
         count += 1
     await ctx.send(f"There were {count} messages in {channel.mention}")
+
+@message_count.error
+async def message_count_error(ctx,error):
+    if isinstance(error, commands.CheckFailure):
+        await ctx.send("You can't use this command <:keku:869498061674668112>")
+    
 
 
 ########################################################################
@@ -166,7 +175,7 @@ async def serverinfo(ctx):
 
 #kick command
 @client.command()
-@commands.has_permissions(kick_members=True)
+@commands.has_any_role("Admin")
 async def kick(ctx, member: discord.Member, *, reason=None):
 
     await ctx.guild.kick(member)
@@ -184,7 +193,7 @@ async def kick_error(ctx, error):
 ######################################################################
         
 @client.command()
-@commands.has_any_role("Admin", "Mod")
+@commands.has_any_role("Admin")
 async def ban(ctx, member: discord.User = None, reason=None):
     if member == None or member == ctx.message.author:
         await ctx.channel.send("You cannot ban yourself")
@@ -202,7 +211,7 @@ async def ban(ctx, member: discord.User = None, reason=None):
 
 #unban command
 @client.command(pass_context=True)
-@commands.has_any_role("Admin", "Mod")
+@commands.has_any_role("Admin")
 async def unban(ctx, *, member):
     banned_members = await ctx.guild.bans()
     for person in banned_members:
@@ -224,7 +233,7 @@ async def unban_error(ctx, error):
 
 #role giving command
 @client.command(pass_context=True)
-@commands.has_any_role("Admin", "Mod")
+@commands.has_any_role("Admin")
 async def giveRole(ctx, member: discord.Member,*, role: discord.Role):
     await member.add_roles(role)
     await ctx.send(f"Gave role **{role}** to **{member.mention}**")
@@ -333,7 +342,7 @@ async def on_voice_state_update(member, before, after):
 
 
 @client.command()
-@commands.has_any_role("Admin", "Mod")
+@commands.has_any_role("Admin")
 async def echo(ctx,
                destination: discord.TextChannel = None,
                *,
@@ -352,7 +361,7 @@ async def echo(ctx,
 @echo.error
 async def echo_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
-        await ctx.send("not worthy enough")
+        await ctx.send("You can't use this command <:keku:869498061674668112>")
 
 
 ##########################################################################################
@@ -431,18 +440,26 @@ async def count(ctx, *, role: str = ""):
             await ctx.channel.send(
                 f"**{count}** people have the role **{role}**")
 
-#############################################################################
-'''
-@client.command()
-@commands.has_any_role("Admin")
-async def removeroles(ctx):
-    x = ctx.guild.members
-    await ctx.send("started")
-    for member in x:
-        await member.remove_roles(member.roles)
-    await ctx.send("done <@760161883336081408> lessgo")
-'''
+
 ##############################################################################
+
+# @client.command(pass_context=True)
+# @commands.has_any_role("Admin")
+# async def addRemove(ctx,*,newRole:discord.Role):
+#     x = ctx.guild.members
+#     for member in x:
+#         for role in member.roles:
+#             if (role.name == "Sem-4 BT"):
+#                 rmRole:discord.Role=role
+#                 await member.add_roles(newRole)
+#                 await member.remove_roles(rmRole)
+#                 # await ctx.send(f"Done for **{member.name}**")
+#     await ctx.channel.send("<@764118123330273330> done")
+
+# @addRemove.error
+# async def test_error(ctx, error):
+#     if isinstance(error, commands.CheckFailure):
+#         await ctx.send(error)
 
 
 ######################################################################
@@ -501,5 +518,6 @@ async def spam(ctx, count, *user):
 keep_alive()
 
 my_secret = os.environ['TOKEN']
+
 
 client.run(my_secret)
