@@ -24,7 +24,7 @@ client = commands.Bot(command_prefix=".", intents=intents) #bot prefix
 async def on_ready():
     print('Bot online')
     await client.change_presence(activity=discord.Game(
-        name="with the pride of PESU"))
+        name=""))
     #msg1.start()
 
 
@@ -292,7 +292,7 @@ async def snipe(ctx):
 @client.event
 async def on_message_edit(before, after):
 
-    if before.channel.id == 889139570304757780:
+    if before.channel.id == #channel_id:
         before.delete
     channellogs = client.get_channel(#logs_channel_id)
     embed = discord.Embed(title=str(before.author) + " edited a message",
@@ -464,12 +464,6 @@ async def count(ctx, *, role: str = ""):
 async def hello(ctx):
     await ctx.send(f'Hello {ctx.author.mention}')
     await ctx.author.send("hello,I hope you are doing good")
-
-@client.command()
-async def pride(ctx):
-    await ctx.channel.send(
-        "https://tenor.com/view/pes-pesuniversity-pesu-may-the-pride-of-pes-may-the-pride-of-pes-be-with-you-gif-21274060"
-    )
 
 @client.command()
 async def noob(ctx):
