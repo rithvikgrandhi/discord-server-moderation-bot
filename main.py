@@ -7,18 +7,16 @@ from webserver import keep_alive
 
 ######################################################################
 #data
-mods = [
-    760161883336081408,764118123330273330,708719821226901534,676050443180179468,699646699177639936,793111567184297985,724570818360639508
-]
+mods = [ ] #roleids
 
-admin_role_id=834694539142103041
+admin_role_id= #roleid
 
 
 ######################################################################
 
 intents = discord.Intents.default()
 intents.members = True
-client = commands.Bot(command_prefix=".", intents=intents)
+client = commands.Bot(command_prefix=".", intents=intents) #bot prefix
 
 
 ######################################################################
@@ -30,7 +28,7 @@ async def on_ready():
     #msg1.start()
 
 
-channellogs = client.get_channel(891551602509488128)
+channellogs = client.get_channel(#channel_id)
 
 ######################################################################
 
@@ -70,7 +68,7 @@ async def dm(ctx, i):
     
 @client.command(aliases=['servers', 'guilds'])
 async def guilds_command(ctx):
-    if ((ctx.author.id == 760161883336081408)):
+    if ((ctx.author.id == #mod_ids)):
         await ctx.channel.trigger_typing()
 
         number = 0
@@ -133,18 +131,18 @@ async def message_count_error(ctx,error):
 ########################################################################
 
 
-@client.event
-async def on_message(message):
-    if message.reference is not None and message.channel.id == 889139570304757780:
-        await message.channel.purge(limit=1)
+# @client.event
+# async def on_message(message):
+#     if message.reference is not None and message.channel.id == 889139570304757780:
+#         await message.channel.purge(limit=1)
 
-    elif message.channel.id == 889139570304757780 and (
-            message.content != ":hmmlurk:" and message.content !=
-            'https://cdn.discordapp.com/emojis/869808170804068362.gif?size=48&quality=lossless'
-            and message.content != '<a:hmmlurk:869808170804068362>'):
-        await message.channel.purge(limit=1)
+#     elif message.channel.id == 889139570304757780 and (
+#             message.content != ":hmmlurk:" and message.content !=
+#             'https://cdn.discordapp.com/emojis/869808170804068362.gif?size=48&quality=lossless'
+#             and message.content != '<a:hmmlurk:869808170804068362>'):
+#         await message.channel.purge(limit=1)
 
-    await client.process_commands(message)
+#     await client.process_commands(message)
 
 
 # ######################################################################
@@ -255,7 +253,7 @@ async def on_message_delete(message):
     # if message.contains
     snipe_message_author[message.channel.id] = message.author
     snipe_message_content[message.channel.id] = message.content
-    channellogs = client.get_channel(891551602509488128)
+    channellogs = client.get_channel(#logs_channel_id)
     embed = discord.Embed(title="someone deleted a message ",
                           color=discord.Color.red())
     embed.add_field(name="Sender:", value=message.author)
@@ -296,12 +294,7 @@ async def on_message_edit(before, after):
 
     if before.channel.id == 889139570304757780:
         before.delete
-    channellogs = client.get_channel(891551602509488128)
-    '''
-    if before.channel.id == 889139570304757780 and (after!='https://cdn.discordapp.com/emojis/869808170804068362.gif?size=48' and
-    after!='<a:hmmlurk:869808170804068362>'):
-        await after.delete()
-  '''
+    channellogs = client.get_channel(#logs_channel_id)
     embed = discord.Embed(title=str(before.author) + " edited a message",
                           color=discord.Color.blue())
 
@@ -330,7 +323,7 @@ async def nick(ctx, member: discord.Member, *, newname: str):
 
 @client.event
 async def on_voice_state_update(member, before, after):
-    channellogs = client.get_channel(891551602509488128)
+    channellogs = client.get_channel(#logs_channel_id)
     if (not before.channel and after.channel):
         embed = discord.Embed(title="someone has joined vc",
                               color=discord.Color.green())
@@ -370,9 +363,9 @@ async def echo_error(ctx, error):
 @client.command()
 # @commands.has_role()
 async def stress(ctx):
-    if (ctx.author.id == 760161883336081408
-            or ctx.author.id == 764118123330273330
-            or ctx.author.id == 793111567184297985):
+    if (ctx.author.id == #mod1
+            or ctx.author.id == #mod_2
+            or ctx.author.id == #Mod_3):
         emoji = discord.utils.get(client.emojis, name='hypersweat')
         for i in range(0, 5):
             msg1 = (str(emoji) + str(emoji) + str(emoji) + str(emoji) +
@@ -387,10 +380,10 @@ async def stress(ctx):
 async def on_member_join(member):
 
     await member.send(
-        f" Hi {member.mention}, welcome to PES media server. Select your cycle in <#877217840493649940> and you'll get access to the important docs of your courses. You get the role by selecting the appropriate emoji as reaction. \n Please note that we do not promote plagiarism on this server (aka you can't ask assignment answers). ||mainly cuz we don't want to be held responsible for it || \n If you find something missing in the docs or your teacher sent you some other reference material, you can ping any of the mods or admins. NOTE: PLS FEEL FREE TO FUCK OFF IF YOU'RE NOT FROM PES UNIVERSITY"
+        f" Hi {member.mention}, welcome to PES media server. Select your cycle in <#get_roles_channel_id> and you'll get access to the important docs of your courses. You get the role by selecting the appropriate emoji as reaction. \n Please note that we do not promote plagiarism on this server (aka you can't ask assignment answers). ||mainly cuz we don't want to be held responsible for it || \n If you find something missing in the docs or your teacher sent you some other reference material, you can ping any of the mods or admins. NOTE: PLS FEEL FREE TO FUCK OFF IF YOU'RE NOT FROM PES UNIVERSITY"
     )
 
-    channellogs2 = client.get_channel(891551602509488128)
+    channellogs2 = client.get_channel(#logs_channel_id)
     embed = discord.Embed(title="someone joined the server",
                           description=member,
                           color=discord.Color.gold())
@@ -402,11 +395,11 @@ async def on_member_join(member):
 
 @client.command()
 async def assemble(ctx):
-    if (ctx.author.id == 760161883336081408
-            or ctx.author.id == 764118123330273330):
+    if (ctx.author.id == #mod_1
+            or ctx.author.id == #mod_2):
         await ctx.send("***Avengers, ASSEMBLE!***")
         await ctx.send(
-            "<@699646699177639936> <@764118123330273330>  <@760161883336081408> <@738685698206597171> <@793111567184297985>"
+            "#mod_id_to_ping"
         )
 
 
@@ -443,6 +436,8 @@ async def count(ctx, *, role: str = ""):
 
 ##############################################################################
 
+ 
+#change roles of all members with a role to another        
 # @client.command(pass_context=True)
 # @commands.has_any_role("Admin")
 # async def addRemove(ctx,*,newRole:discord.Role):
@@ -501,10 +496,10 @@ async def stripper(ctx):
             
 @client.command()
 async def spam(ctx, count, *user):
-    if (ctx.message.author.id == 760161883336081408
-            or ctx.message.author.id == 657648133701894174
-            or ctx.message.author.id == 793111567184297985
-            or ctx.message.author.id == 764118123330273330):
+    if (ctx.message.author.id == #mod_1
+            or ctx.message.author.id == #mod_2
+            or ctx.message.author.id == #mod_3
+            or ctx.message.author.id == #mod_4):
         for i in range(int(count)):
 
             await ctx.send(" ".join(list(user)))
